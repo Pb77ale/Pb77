@@ -1,0 +1,134 @@
+name: GumnaamGhs
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  schedule:
+    - cron: '0 */6 * * *'  # Runs every 6 hours for MongoDB backup
+
+jobs:
+  setup-mongo-and-run-bot:
+    runs-on: ubuntu-latest
+    env:
+      TZ: 'Asia/Kolkata'
+    steps:
+      # Step 1: Checkout repository
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      # Step 2: Set up Python
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      # Step 3: Install MongoDB Tools (required for mongodump and mongorestore)
+      - name: Install MongoDB Tools
+        run: |
+          # Add MongoDB GPG key
+          wget -qO - https://www.mongodb.org/static/pgp/server-6.0.asc | sudo apt-key add -
+          
+          # Add MongoDB repository
+          echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu $(lsb_release -cs)/mongodb-org/6.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-6.0.list
+          
+          # Update and install MongoDB tools
+          sudo apt-get update
+          sudo apt-get install -y mongodb-org mongodb-org-tools
+          
+      # Step 4: Install Dependencies for Python Bot
+      - name: Install Python dependencies
+        run: |
+          pip install telebot pyTelegramBotApi pymongo aiohttp psutil flask aiogram asyncio
+
+      # Step 5: Grant execute permissions to necessary files
+      - name: Grant execute permissions
+        run: |
+          chmod +x *
+          chmod +x GumnaamGhs.py
+
+      # Step 6: Run the Python bot continuously
+      - name: Run Python Bot
+        run: |
+          echo "Running Python Bot..."
+          nohup python3 GumnaamGhs.py &
+
+  backup-mongo:
+    needs: setup-mongo-and-run-bot
+    runs-on: ubuntu-latest
+    steps:
+      # Step 1: Checkout repository
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      # Step 2: Backup MongoDB
+     # - name: Backup MongoDB
+      #  run: |
+         #echo Starting MongoDB backup..."
+        #  mkdir -p ./backup  # Create backup directory if it doesn't exist
+        #  mongodump --uri="mongodb+srv://GumnaamHuni:Goru1234@gumnaamhuni.wsvoh.mongodb.net/GumnaamHuni" --out=./backup/mongodb_backup_$(date +%F_%T)
+ 
+      # Step 3: Upload MongoDB Backup as artifact
+     # - name: Upload MongoDB Backup
+      #  uses: actions/upload-artifact@v3
+      #  with:
+       #   name: mongodb-backup
+      #    path: ./backup/
+
+  Bot-Start:
+    needs: backup-mongo
+    runs-on: ubuntu-latest
+    steps:
+      # Step 1: Checkout repository
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      # Step 2: Install MongoDB Tools for Restore
+      - name: Install MongoDB Tools
+        run: |
+          # Add MongoDB GPG key
+          wget -qO - https://www.mongodb.org/static/pgp/server-6.0.asc | sudo apt-key add -
+          
+          # Add MongoDB repository
+          echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu $(lsb_release -cs)/mongodb-org/6.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-6.0.list
+          
+          # Update and install MongoDB tools
+          sudo apt-get update
+          sudo apt-get install -y mongodb-org-tools
+
+      # Step 3: Download Backup
+     # - name: Download MongoDB Backup
+      #  uses: actions/download-artifact@v3
+     #   with:
+      #    name: mongodb-backup
+
+      # Step 4: Restore MongoDB
+     # - name: Restore MongoDB
+     #   run: |
+       #   echo "Restoring MongoDB from backup..."
+        #  mongorestore --uri= "mongodb+srv://GumnaamHuni:Goru1234@gumnaamhuni.wsvoh.mongodb.net      " ./backup
+
+        # Step 4: Install Dependencies for Python Bot
+      - name: Install Python dependencies
+        run: |
+          pip install telebot pyTelegramBotApi pymongo aiohttp psutil flask aiogram asyncio
+
+      # Step 5: Grant execute permissions to necessary files
+      - name: Grant execute permissions
+        run: |
+          chmod +x *
+            chmod +x GumnaamGhs.py
+            chmod +x Gumnaam.py
+          chmod +x keep_alive.py
+          
+              
+  # Step 6: Run the Python bot continuously
+      - name: Re-Run Python Bot
+        run: |
+          echo "Running Python Bot..."
+          nohup python3 GumnaamGhs.py
+
+          
